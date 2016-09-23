@@ -25,6 +25,7 @@
 
 #include "eval.h"
 #include "fileutil.h"
+#include "flags.h"
 #include "log.h"
 #include "rule.h"
 #include "stats.h"
@@ -161,10 +162,10 @@ struct RuleMerger {
 
     if (primary_rule && !r->cmds.empty() &&
         !IsSuffixRule(output) && !r->is_double_colon) {
-      WARN("%s:%d: warning: overriding commands for target `%s'",
-           LOCF(r->cmd_loc()), output.c_str());
-      WARN("%s:%d: warning: ignoring old commands for target `%s'",
-           LOCF(primary_rule->cmd_loc()), output.c_str());
+      //WARN("%s:%d: warning: overriding commands for target `%s'",
+      //     LOCF(r->cmd_loc()), output.c_str());
+      //WARN("%s:%d: warning: ignoring old commands for target `%s'",
+      //     LOCF(primary_rule->cmd_loc()), output.c_str());
       primary_rule = r;
     }
     if (!primary_rule && !r->cmds.empty()) {
@@ -214,6 +215,8 @@ struct RuleMerger {
       if (r == primary_rule)
         continue;
       FillDepNodeFromRule(output, r, n);
+      if (n->loc.filename == NULL)
+        n->loc = r->loc;
     }
   }
 };
@@ -287,7 +290,6 @@ class DepBuilder {
       ".EXPORT_ALL_VARIABLES",
       ".NOTPARALLEL",
       ".ONESHELL",
-      ".POSIX",
       NULL
     };
     for (const char** p = kUnsupportedBuiltinTargets; *p; p++) {
